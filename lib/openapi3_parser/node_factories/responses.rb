@@ -1,16 +1,14 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/context"
+require "openapi3_parser/node_factory_refactor/map"
 require "openapi3_parser/node_factories/response"
-require "openapi3_parser/node_factory/map"
 require "openapi3_parser/node_factory/optional_reference"
 require "openapi3_parser/node/responses"
 
 module Openapi3Parser
   module NodeFactories
-    class Responses
-      include NodeFactory::Map
-
+    class Responses < NodeFactoryRefactor::Map
       KEY_REGEX = /
         \A
         (
@@ -21,32 +19,24 @@ module Openapi3Parser
         \Z
       /x
 
+      def initialize(context)
+        factory = NodeFactory::OptionalReference.new(NodeFactories::Response)
+
+        super(context,
+              allow_extensions: true,
+              value_factory: factory,
+              validate: method(:validate_keys))
+      end
+
       private
 
-      def process_input(input)
-        input.each_with_object({}) do |(key, value), memo|
-          memo[key] = value if extension?(key)
-          next_context = Context.next_field(context, key)
-          memo[key] = child_factory(next_context)
-        end
-      end
-
-      def child_factory(child_context)
-        NodeFactory::OptionalReference.new(NodeFactories::Response)
-                                      .call(child_context)
-      end
-
-      def build_map(data, context)
+      def build_map(data)
         Node::Responses.new(data, context)
       end
 
-      def validate(input, _context)
-        validate_keys(input.keys)
-      end
-
-      def validate_keys(keys)
-        invalid = keys.reject do |key|
-          extension?(key) || KEY_REGEX.match(key)
+      def validate_keys(input, _context)
+        invalid = input.keys.reject do |key|
+          NodeFactoryRefactor::EXTENSION_REGEX.match(key) || KEY_REGEX.match(key)
         end
 
         return if invalid.empty?

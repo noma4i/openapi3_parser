@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/discriminator"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 
 module Openapi3Parser
   module NodeFactories
-    class Discriminator
-      include NodeFactory::Object
+    class Discriminator < NodeFactoryRefactor::Object
 
       field "propertyName", input_type: String, required: true
       field "mapping", input_type: Hash,

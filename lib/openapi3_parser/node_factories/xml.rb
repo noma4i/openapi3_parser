@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/xml"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/validators/absolute_uri"
 
 module Openapi3Parser
   module NodeFactories
-    class Xml
-      include NodeFactory::Object
-
+    class Xml < NodeFactoryRefactor::Object
       allow_extensions
       field "name", input_type: String
       field "namespace",

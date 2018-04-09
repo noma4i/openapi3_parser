@@ -2,9 +2,9 @@
 
 require "openapi3_parser/context"
 require "openapi3_parser/node/response"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/map"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/optional_reference"
-require "openapi3_parser/node_factories/map"
 require "openapi3_parser/node_factories/header"
 require "openapi3_parser/node_factories/media_type"
 require "openapi3_parser/node_factories/link"
@@ -14,9 +14,7 @@ require "openapi3_parser/validators/component_keys"
 
 module Openapi3Parser
   module NodeFactories
-    class Response
-      include NodeFactory::Object
-
+    class Response < NodeFactoryRefactor::Object
       allow_extensions
       field "description", input_type: String, required: true
       field "headers", factory: :headers_factory
@@ -31,11 +29,11 @@ module Openapi3Parser
 
       def headers_factory(context)
         factory = NodeFactory::OptionalReference.new(NodeFactories::Header)
-        NodeFactories::Map.new(context, value_factory: factory)
+        NodeFactoryRefactor::Map.new(context, value_factory: factory)
       end
 
       def content_factory(context)
-        NodeFactories::Map.new(
+        NodeFactoryRefactor::Map.new(
           context,
           validate: method(:validate_content),
           value_factory: NodeFactories::MediaType
@@ -44,7 +42,7 @@ module Openapi3Parser
 
       def links_factory(context)
         factory = NodeFactory::OptionalReference.new(NodeFactories::Link)
-        NodeFactories::Map.new(
+        NodeFactoryRefactor::Map.new(
           context,
           validate: ->(input, _) { Validators::ComponentKeys.call(input) },
           value_factory: factory

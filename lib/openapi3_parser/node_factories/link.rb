@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/license"
-require "openapi3_parser/node_factory/object"
-require "openapi3_parser/node_factories/map"
+require "openapi3_parser/node_factory_refactor/map"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factories/server"
 
 module Openapi3Parser
   module NodeFactories
-    class Link
-      include NodeFactory::Object
+    class Link < NodeFactoryRefactor::Object
 
       allow_extensions
 
@@ -31,7 +30,7 @@ module Openapi3Parser
       end
 
       def parameters_factory(context)
-        NodeFactories::Map.new(context)
+        NodeFactoryRefactor::Map.new(context)
       end
 
       def server_factory(context)

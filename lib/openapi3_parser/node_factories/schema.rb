@@ -1,19 +1,17 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/schema"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/map"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/optional_reference"
-require "openapi3_parser/node_factories/map"
-require "openapi3_parser/node_factories/array"
+require "openapi3_parser/node_factory_refactor/array"
 require "openapi3_parser/node_factories/external_documentation"
 require "openapi3_parser/node_factories/discriminator"
 require "openapi3_parser/node_factories/xml"
 
 module Openapi3Parser
   module NodeFactories
-    class Schema
-      include NodeFactory::Object
-
+    class Schema < NodeFactoryRefactor::Object
       allow_extensions
       field "title", input_type: String
       field "multipleOf", input_type: Numeric
@@ -77,7 +75,7 @@ module Openapi3Parser
       end
 
       def required_factory(context)
-        NodeFactories::Array.new(
+        NodeFactoryRefactor::Array.new(
           context,
           default: nil,
           value_input_type: String
@@ -85,7 +83,7 @@ module Openapi3Parser
       end
 
       def enum_factory(context)
-        NodeFactories::Array.new(context, default: nil)
+        NodeFactoryRefactor::Array.new(context, default: nil)
       end
 
       def disciminator_factory(context)
@@ -101,7 +99,7 @@ module Openapi3Parser
       end
 
       def properties_factory(context)
-        NodeFactories::Map.new(
+        NodeFactoryRefactor::Map.new(
           context,
           value_factory: NodeFactories::Schema
         )
@@ -112,7 +110,7 @@ module Openapi3Parser
       end
 
       def referenceable_schema_array(context)
-        NodeFactories::Array.new(
+        NodeFactoryRefactor::Array.new(
           context,
           default: nil,
           value_factory: NodeFactory::OptionalReference.new(self.class)

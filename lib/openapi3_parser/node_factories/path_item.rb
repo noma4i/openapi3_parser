@@ -2,10 +2,10 @@
 
 require "openapi3_parser/node/path_item"
 require "openapi3_parser/node_factory/fields/reference"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/object/node_builder"
 require "openapi3_parser/node_factory/optional_reference"
-require "openapi3_parser/node_factories/array"
+require "openapi3_parser/node_factory_refactor/array"
 require "openapi3_parser/node_factories/server"
 require "openapi3_parser/node_factories/operation"
 require "openapi3_parser/node_factories/parameter"
@@ -13,9 +13,7 @@ require "openapi3_parser/validators/duplicate_parameters"
 
 module Openapi3Parser
   module NodeFactories
-    class PathItem
-      include NodeFactory::Object
-
+    class PathItem < NodeFactoryRefactor::Object
       allow_extensions
       field "$ref", input_type: String, factory: :ref_factory
       field "summary", input_type: String
@@ -45,7 +43,7 @@ module Openapi3Parser
       end
 
       def ref_factory(context)
-        Fields::Reference.new(context, self.class)
+        NodeFactory::Fields::Reference.new(context, self.class)
       end
 
       def operation_factory(context)
@@ -53,7 +51,7 @@ module Openapi3Parser
       end
 
       def servers_factory(context)
-        NodeFactories::Array.new(
+        NodeFactoryRefactor::Array.new(
           context,
           value_factory: NodeFactories::Server
         )
@@ -76,13 +74,17 @@ module Openapi3Parser
       def parameters_factory(context)
         factory = NodeFactory::OptionalReference.new(NodeFactories::Parameter)
 
-        validate = lambda do |_input, array_factory|
-          Validators::DuplicateParameters.call(array_factory.resolved_input)
+        validate_parameters = lambda do |validatable|
+          validatable.add_error(
+            Validators::DuplicateParameters.call(
+              validatable.factory.resolved_input
+            )
+          )
         end
 
-        NodeFactories::Array.new(context,
-                                 value_factory: factory,
-                                 validate: validate)
+        NodeFactoryRefactor::Array.new(context,
+                                       value_factory: factory,
+                                       validate: validate_parameters)
       end
     end
   end

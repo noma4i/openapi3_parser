@@ -2,15 +2,14 @@
 
 require "openapi3_parser/context"
 require "openapi3_parser/node/parameter"
-require "openapi3_parser/node_factories/parameter/parameter_like"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factories/parameter_like"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/validation/error"
 
 module Openapi3Parser
   module NodeFactories
-    class Parameter
-      include NodeFactory::Object
-      include Parameter::ParameterLike
+    class Parameter < NodeFactoryRefactor::Object
+      include ParameterLike
 
       allow_extensions
 

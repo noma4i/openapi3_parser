@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/server"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/map"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factories/server_variable"
-require "openapi3_parser/node_factories/map"
 
 module Openapi3Parser
   module NodeFactories
-    class Server
-      include NodeFactory::Object
-
+    class Server < NodeFactoryRefactor::Object
       allow_extensions
       field "url", input_type: String, required: true
       field "description", input_type: String
@@ -22,7 +20,7 @@ module Openapi3Parser
       end
 
       def variables_factory(context)
-        NodeFactories::Map.new(
+        NodeFactoryRefactor::Map.new(
           context,
           value_factory: NodeFactories::ServerVariable
         )

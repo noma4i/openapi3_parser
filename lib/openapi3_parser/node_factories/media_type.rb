@@ -1,17 +1,16 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/media_type"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/map"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/optional_reference"
-require "openapi3_parser/node_factories/map"
 require "openapi3_parser/node_factories/schema"
 require "openapi3_parser/node_factories/example"
 require "openapi3_parser/node_factories/encoding"
 
 module Openapi3Parser
   module NodeFactories
-    class MediaType
-      include NodeFactory::Object
+    class MediaType < NodeFactoryRefactor::Object
 
       allow_extensions
 
@@ -35,11 +34,11 @@ module Openapi3Parser
 
       def examples_factory(context)
         factory = NodeFactory::OptionalReference.new(NodeFactories::Example)
-        NodeFactories::Map.new(context, default: nil, value_factory: factory)
+        NodeFactoryRefactor::Map.new(context, default: nil, value_factory: factory)
       end
 
       def encoding_factory(context)
-        NodeFactories::Map.new(
+        NodeFactoryRefactor::Map.new(
           context,
           validate: EncodingValidator.new(self),
           value_factory: NodeFactories::Encoding

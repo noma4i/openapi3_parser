@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/contact"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/validators/url"
 require "openapi3_parser/validators/email"
 
 module Openapi3Parser
   module NodeFactories
-    class Contact
-      include NodeFactory::Object
+    class Contact < NodeFactoryRefactor::Object
 
       allow_extensions
 

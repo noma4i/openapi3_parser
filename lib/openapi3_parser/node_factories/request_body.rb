@@ -2,17 +2,15 @@
 
 require "openapi3_parser/context"
 require "openapi3_parser/node/request_body"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/map"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factories/media_type"
-require "openapi3_parser/node_factories/map"
 require "openapi3_parser/validation/error"
 require "openapi3_parser/validators/media_type"
 
 module Openapi3Parser
   module NodeFactories
-    class RequestBody
-      include NodeFactory::Object
-
+    class RequestBody < NodeFactoryRefactor::Object
       allow_extensions
       field "description", input_type: String
       field "content", factory: :content_factory, required: true
@@ -25,7 +23,7 @@ module Openapi3Parser
       end
 
       def content_factory(context)
-        NodeFactories::Map.new(
+        NodeFactoryRefactor::Map.new(
           context,
           value_factory: NodeFactories::MediaType,
           validate: ContentValidator

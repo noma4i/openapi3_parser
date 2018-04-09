@@ -2,14 +2,12 @@
 
 require "openapi3_parser/node/security_scheme"
 require "openapi3_parser/node_factories/oauth_flows"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/optional_reference"
 
 module Openapi3Parser
   module NodeFactories
-    class SecurityScheme
-      include NodeFactory::Object
-
+    class SecurityScheme < NodeFactoryRefactor::Object
       allow_extensions
 
       field "type", input_type: String, required: true

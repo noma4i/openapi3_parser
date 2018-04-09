@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/license"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/validators/url"
 
 module Openapi3Parser
   module NodeFactories
-    class License
-      include NodeFactory::Object
-
+    class License < NodeFactoryRefactor::Object
       allow_extensions
       field "name", input_type: String, required: true
       field "url",

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/components"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/optional_reference"
-require "openapi3_parser/node_factories/map"
+require "openapi3_parser/node_factory_refactor/map"
 require "openapi3_parser/node_factories/schema"
 require "openapi3_parser/node_factories/response"
 require "openapi3_parser/node_factories/parameter"
@@ -17,8 +17,7 @@ require "openapi3_parser/validators/component_keys"
 
 module Openapi3Parser
   module NodeFactories
-    class Components
-      include NodeFactory::Object
+    class Components < NodeFactoryRefactor::Object
 
       allow_extensions
       field "schemas", factory: :schemas_factory
@@ -74,7 +73,7 @@ module Openapi3Parser
       end
 
       def referenceable_map_factory(context, factory)
-        NodeFactories::Map.new(
+        NodeFactoryRefactor::Map.new(
           context,
           value_factory: NodeFactory::OptionalReference.new(factory),
           validate: ->(input, _) { Validators::ComponentKeys.call(input) }

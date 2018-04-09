@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/fields/reference"
 
 module Openapi3Parser
   module NodeFactories
-    class Reference
-      include NodeFactory::Object
-
+    class Reference < NodeFactoryRefactor::Object
       field "$ref", input_type: String, required: true, factory: :ref_factory
 
       attr_reader :factory
@@ -24,7 +22,7 @@ module Openapi3Parser
       end
 
       def ref_factory(context)
-        Fields::Reference.new(context, factory)
+        NodeFactory::Fields::Reference.new(context, factory)
       end
 
       def build_resolved_input

@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/external_documentation"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/validators/url"
 
 module Openapi3Parser
   module NodeFactories
-    class ExternalDocumentation
-      include NodeFactory::Object
+    class ExternalDocumentation < NodeFactoryRefactor::Object
 
       allow_extensions
 

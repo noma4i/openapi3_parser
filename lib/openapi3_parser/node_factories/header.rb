@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/header"
-require "openapi3_parser/node_factories/parameter/parameter_like"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factories/parameter_like"
+require "openapi3_parser/node_factory_refactor/object"
 
 module Openapi3Parser
   module NodeFactories
-    class Header
-      include NodeFactory::Object
-      include Parameter::ParameterLike
+    class Header < NodeFactoryRefactor::Object
+      include ParameterLike
 
       allow_extensions
 

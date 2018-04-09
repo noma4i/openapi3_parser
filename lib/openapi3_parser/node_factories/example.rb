@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/example"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/validators/url"
 
 module Openapi3Parser
   module NodeFactories
-    class Example
-      include NodeFactory::Object
+    class Example < NodeFactoryRefactor::Object
 
       allow_extensions
 

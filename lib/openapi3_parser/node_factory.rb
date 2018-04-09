@@ -68,6 +68,15 @@ module Openapi3Parser
       context.input.nil?
     end
 
+      def allowed_extensions?
+        self.class.allowed_extensions?
+      end
+
+      def mutually_exclusive_fields
+        self.class.mutually_exclusive_fields
+      end
+
+
     def resolved_input
       @resolved_input ||= processed_input ? build_resolved_input : nil
     end

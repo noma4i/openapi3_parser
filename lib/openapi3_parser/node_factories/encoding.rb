@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/encoding"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/map"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/node_factory/optional_reference"
-require "openapi3_parser/node_factories/map"
 require "openapi3_parser/node_factories/header"
 
 module Openapi3Parser
   module NodeFactories
-    class Encoding
-      include NodeFactory::Object
+    class Encoding < NodeFactoryRefactor::Object
 
       allow_extensions
 
@@ -27,7 +26,7 @@ module Openapi3Parser
 
       def headers_factory(context)
         factory = NodeFactory::OptionalReference.new(NodeFactories::Header)
-        NodeFactories::Map.new(context, value_factory: factory)
+        NodeFactoryRefactor::Map.new(context, value_factory: factory)
       end
 
       def default_explode

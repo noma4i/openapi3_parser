@@ -1,17 +1,14 @@
 # frozen_string_literal: true
 
-require "openapi3_parser/node_factory"
+require "openapi3_parser/node_factory_refactor/field"
 require "openapi3_parser/validators/reference"
 
 module Openapi3Parser
   module NodeFactory
     module Fields
-      class Reference
-        include NodeFactory
-        input_type ::String
-
+      class Reference < NodeFactoryRefactor::Field
         def initialize(context, factory)
-          super(context)
+          super(context, input_type: String, validate: :validate)
           @factory = factory
           @given_reference = context.input
           @reference_resolver = create_reference_resolver
@@ -25,12 +22,12 @@ module Openapi3Parser
 
         attr_reader :given_reference, :factory, :reference_resolver
 
-        def validate(_, _)
+        def validate
           return reference_validator.errors unless reference_validator.valid?
           reference_resolver&.errors
         end
 
-        def build_node(_)
+        def build_node
           reference_resolver&.node
         end
 

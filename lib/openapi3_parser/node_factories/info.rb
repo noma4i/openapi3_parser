@@ -3,13 +3,12 @@
 require "openapi3_parser/node/info"
 require "openapi3_parser/node_factories/license"
 require "openapi3_parser/node_factories/contact"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 require "openapi3_parser/validators/url"
 
 module Openapi3Parser
   module NodeFactories
-    class Info
-      include NodeFactory::Object
+    class Info < NodeFactoryRefactor::Object
 
       allow_extensions
       field "title", input_type: String, required: true

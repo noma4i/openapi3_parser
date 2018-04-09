@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/node/oauth_flow"
-require "openapi3_parser/node_factory/object"
+require "openapi3_parser/node_factory_refactor/object"
 
 module Openapi3Parser
   module NodeFactories
-    class OauthFlow
-      include NodeFactory::Object
+    class OauthFlow < NodeFactoryRefactor::Object
 
       allow_extensions
       field "authorizationUrl", input_type: String

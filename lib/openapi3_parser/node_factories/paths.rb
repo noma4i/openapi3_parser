@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
-require "openapi3_parser/node_factory/map"
+require "openapi3_parser/node_factory_refactor/map"
 require "openapi3_parser/node_factory/optional_reference"
 require "openapi3_parser/node_factories/path_item"
 require "openapi3_parser/node/paths"
 
 module Openapi3Parser
   module NodeFactories
-    class Paths
-      include NodeFactory::Map
+    class Paths < NodeFactoryRefactor::Map
       PATH_REGEX = %r{
         \A
         # required prefix slash
@@ -24,27 +23,23 @@ module Openapi3Parser
         \Z
       }x
 
+      def initialize(context)
+        factory = NodeFactory::OptionalReference.new(NodeFactories::PathItem)
+
+        super(context,
+              allow_extensions: true,
+              value_factory: factory,
+              validate: :validate)
+      end
+
       private
 
-      def process_input(input)
-        input.each_with_object({}) do |(key, value), memo|
-          memo[key] = value if extension?(key)
-          next_context = Context.next_field(context, key)
-          memo[key] = child_factory(next_context)
-        end
-      end
-
-      def child_factory(child_context)
-        NodeFactory::OptionalReference.new(NodeFactories::PathItem)
-                                      .call(child_context)
-      end
-
-      def build_map(data, context)
+      def build_map(data)
         Node::Paths.new(data, context)
       end
 
-      def validate(input, _context)
-        paths = input.keys.reject { |key| extension?(key) }
+      def validate
+        paths = context.input.keys.reject { |key| NodeFactoryRefactor::EXTENSION_REGEX =~ key }
         validate_paths(paths)
       end
 
