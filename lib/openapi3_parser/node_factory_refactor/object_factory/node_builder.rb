@@ -53,6 +53,14 @@ module Openapi3Parser
             resolved_value
           end
         end
+
+        def default_value
+          if factory.nil_input? && factory.default.nil?
+            nil
+          else
+            factory.processed_input
+          end
+        end
       end
     end
   end

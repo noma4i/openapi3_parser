@@ -2,13 +2,15 @@
 
 require "ostruct"
 
+require "openapi3_parser/node_factory_refactor/object_factory/field_config"
+
 module Openapi3Parser
   module NodeFactoryRefactor
     module ObjectFactory
       module Dsl
         def field(name, **options)
           @field_configs ||= {}
-          @field_configs[name] = NodeFactory::FieldConfig.new(options)
+          @field_configs[name] = FieldConfig.new(options)
         end
 
         def field_configs

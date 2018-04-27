@@ -37,9 +37,7 @@ module Openapi3Parser
       end
 
       def raw_resolved_input
-        @raw_resolved_input ||= processed_input.map do |value|
-          value.respond_to?(:resolved_input) ? value.resolved_input : value
-        end
+        @raw_resolved_input ||= build_resolved_input
       end
 
       def nil_input?
@@ -83,6 +81,14 @@ module Openapi3Parser
 
       def build_node(data)
         Node::Array.new(data, context)
+      end
+
+      def build_resolved_input
+        return unless processed_input
+
+        processed_input.map do |value|
+          value.respond_to?(:resolved_input) ? value.resolved_input : value
+        end
       end
 
       class ValidNodeBuilder

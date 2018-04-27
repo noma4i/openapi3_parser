@@ -5,10 +5,12 @@ require "ostruct"
 
 require "openapi3_parser/context"
 require "openapi3_parser/node_factory_refactor/object_factory/dsl"
+require "openapi3_parser/node_factory_refactor/type_checker"
 require "openapi3_parser/node_factory/field_config"
 require "openapi3_parser/node_factory/object/node_builder"
 require "openapi3_parser/node_factory/object/validator"
 require "openapi3_parser/validation/error_collection"
+require "openapi3_parser/validation/validatable"
 
 module Openapi3Parser
   module NodeFactoryRefactor
@@ -145,6 +147,47 @@ module Openapi3Parser
           end
         end
         Validation::ErrorCollection.new(error_objects)
+      end
+
+      class ValidNodeBuilder
+        def self.errors(factory)
+          new(factory).errors
+        end
+
+        def self.data(factory)
+          new(factory).data
+        end
+
+        def initialize(factory)
+          @factory = factory
+          @validatable = Validation::Validatable.new(factory)
+        end
+
+        def errors
+          return validatable.collection if factory.nil_input?
+          TypeChecker.validate_type(validatable, type: Hash)
+          return validatable.collection if validatable.errors.any?
+          collate_errors
+          validatable.collection
+        end
+
+        def data
+          return default_value if factory.nil_input?
+
+          TypeChecker.raise_on_invalid_type(factory.context, type: Hash)
+          check_values(raise_on_invalid: true)
+          validate(raise_on_invalid: true)
+
+          factory.processed_input.map do |value|
+            value.respond_to?(:node) ? value.node : value
+          end
+        end
+
+        private_class_method :new
+
+        private
+
+        attr_reader :factory, :validate
       end
     end
   end
