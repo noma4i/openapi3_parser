@@ -17,8 +17,8 @@ module Openapi3Parser
 
       private
 
-      def build_node(input)
-        input["$ref"].node
+      def build_node
+        data["$ref"].node
       end
 
       def ref_factory(context)

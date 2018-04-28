@@ -27,7 +27,7 @@ module Openapi3Parser
       end
 
       def add_errors(errors)
-        errors = errors.to_a if errors.respond_to?(:errors)
+        errors = errors.to_a if errors.respond_to?(:to_a)
         errors.each { |e| add_error(e) }
       end
 
