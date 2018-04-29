@@ -56,12 +56,7 @@ module Openapi3Parser
           configs = factory.field_configs
           configs.each_with_object([]) do |(name, field_config), memo|
             field = factory.raw_input[name]
-            is_missing = if field.respond_to?(:nil_input?)
-                           field.nil_input?
-                         else
-                           field.nil?
-                         end
-            memo << name if field_config.required? && is_missing
+            memo << name if field_config.required? && field.nil?
           end
         end
 
@@ -127,6 +122,8 @@ module Openapi3Parser
         end
 
         def check_field(name, field_config)
+          return if factory.raw_input[name].nil?
+
           field_validatable = Validation::Validatable.new(
             factory,
             context: Context.next_field(factory.context, name)

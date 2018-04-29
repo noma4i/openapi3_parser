@@ -79,8 +79,11 @@ module Openapi3Parser
             given_validate.call(validatable)
           elsif given_validate.is_a?(Symbol)
             validatable.factory.send(given_validate, validatable)
+          elsif given_validate.respond_to?(:call)
+            given_validate.call(validatable)
           else
-            raise Error::NotCallable, "Expected a Proc or Symbol for validate"
+            raise Error::NotCallable, "Expected a Proc, a Symbol or an object"\
+                                      " responding to .call for validate"
           end
         end
       end

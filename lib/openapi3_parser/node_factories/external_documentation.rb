@@ -2,6 +2,7 @@
 
 require "openapi3_parser/node/external_documentation"
 require "openapi3_parser/node_factory_refactor/object"
+require "openapi3_parser/validation/input_validator"
 require "openapi3_parser/validators/url"
 
 module Openapi3Parser
@@ -14,7 +15,7 @@ module Openapi3Parser
       field "url",
             required: true,
             input_type: String,
-            validate: ->(input) { Validators::Url.call(input) }
+            validate: Validation::InputValidator.new(Validators::Url)
 
       private
 

@@ -43,12 +43,15 @@ module Openapi3Parser
       attr_reader :type
 
       def valid_type?(input)
+        return [true, false].include?(input) if type == :boolean
         input.is_a?(type)
       end
 
       def error_message
         type_name = if type == Hash
                       "Object"
+                    elsif type == :boolean
+                      "Boolean"
                     else
                       type.to_s
                     end
