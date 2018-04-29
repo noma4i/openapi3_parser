@@ -2,6 +2,7 @@
 
 require "openapi3_parser/array_sentence"
 require "openapi3_parser/error"
+require "openapi3_parser/validation/validatable"
 
 module Openapi3Parser
   module NodeFactoryRefactor
@@ -55,12 +56,12 @@ module Openapi3Parser
           configs = factory.field_configs
           configs.each_with_object([]) do |(name, field_config), memo|
             field = factory.raw_input[name]
-            is_nil = if field.respond_to?(:nil_input?)
-                       field.nil_input?
-                     else
-                       field.nil?
-                     end
-            memo << name if field_config.required?(factory) && is_nil
+            is_missing = if field.respond_to?(:nil_input?)
+                           field.nil_input?
+                         else
+                           field.nil?
+                         end
+            memo << name if field_config.required? && is_missing
           end
         end
 
@@ -91,7 +92,7 @@ module Openapi3Parser
         end
 
         def check_mutually_exclusive_fields
-          mutually_exclusive = MututallyExclusiveFields.new(factory)
+          mutually_exclusive = MututallyExclusiveFieldErrors.new(factory)
           required_errors = mutually_exclusive.required_errors
           exclusive_errors = mutually_exclusive.exclusive_errors
 
@@ -108,13 +109,37 @@ module Openapi3Parser
                     "#{exclusive_errors.first}"
             end
           else
-            validateable.add_errors(required_errors)
-            validateable.add_errors(exclusive_errors)
+            validatable.add_errors(required_errors)
+            validatable.add_errors(exclusive_errors)
           end
         end
 
         def check_invalid_fields
-          # todo
+          factory.data.each do |name, field|
+            if field.respond_to?(:errors)
+              # We don't add errors when we're building a node as they will
+              # be raised when that child node is built
+              validatable.add_errors(field.errors) unless building_node
+            elsif factory.field_configs[name]
+              check_field(name, factory.field_configs[name])
+            end
+          end
+        end
+
+        def check_field(name, field_config)
+          field_validatable = Validation::Validatable.new(
+            factory,
+            context: Context.next_field(factory.context, name)
+          )
+
+          valid_input_type = field_config.check_input_type(field_validatable,
+                                                           building_node)
+
+          if valid_input_type
+            field_config.validate_field(field_validatable, building_node)
+          end
+
+          validatable.add_errors(field_validatable.errors)
         end
 
         class MututallyExclusiveFieldErrors
@@ -128,7 +153,7 @@ module Openapi3Parser
             errors[:required]
           end
 
-          def exlcusive_errors
+          def exclusive_errors
             errors[:exclusive]
           end
 

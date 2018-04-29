@@ -22,8 +22,9 @@ module Openapi3Parser
 
       def validate_type(validatable, context)
         return unless type
-        context ||= validatable.factory.context
-        unless valid_type?(context.input)
+        context ||= validatable.context
+        valid_type?(context.input).tap do |valid|
+          next if valid
           validatable.add_error("Invalid type. #{error_message}", context)
         end
       end
@@ -31,8 +32,8 @@ module Openapi3Parser
       def raise_on_invalid_type(context)
         return unless type
         unless valid_type?(context.input)
-          raise Openapi3Parser::Error::InvalidType,
-                "Invalid type for #{context.location_summary}. "\
+          raise Error::InvalidType,
+                "Invalid type for #{context.location_summary}: "\
                 "#{error_message}"
         end
       end

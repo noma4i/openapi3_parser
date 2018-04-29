@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 require "openapi3_parser/error"
+require "openapi3_parser/node_factory_refactor/type_checker"
 
 module Openapi3Parser
   module NodeFactoryRefactor
     module ObjectFactory
       class FieldConfig
-        attr_reader :given_input_type, :given_factory, :given_required,
-                    :given_default, :given_validate
-
         def initialize(
           input_type: nil,
           factory: nil,
@@ -27,30 +25,42 @@ module Openapi3Parser
           !given_factory.nil?
         end
 
-        def initialize_factory(context, factory)
+        def initialize_factory(context, parent_factory)
           if given_factory.is_a?(Class)
             given_factory.new(context)
           elsif given_factory.is_a?(Symbol)
-            factory.send(given_factory, context)
+            parent_factory.send(given_factory, context)
           else
             given_factory.call(context)
           end
         end
 
-        def required?(_factory)
+        def required?
           given_required
         end
 
-        def input_type_error(input, factory)
-          return if !given_input_type || input.nil?
-          return boolean_error(input) if given_input_type == :boolean
-          resolve_type_error(input, factory)
+        def check_input_type(validatable, building_node)
+          return unless given_input_type || validatable.input.nil?
+
+          if building_node
+            TypeChecker.raise_on_invalid_type(validatable.context,
+                                              type: given_input_type)
+          else
+            TypeChecker.validate_type(validatable, type: given_input_type)
+          end
         end
 
-        def validation_errors(input, factory)
-          return [] if !given_validate || input.nil?
-          errors = resolve_validation_errors(input, factory)
-          Array(errors)
+        def validate_field(validatable, building_node)
+          return if !given_validate || validatable.input.nil?
+
+          run_validation(validatable)
+
+          if building_node && validatable.errors.any?
+            error = validatable.errors.first
+            location_summary = error.context.location_summary
+            raise Error::InvalidData,
+                  "Invalid data for #{location_summary}: #{error.message}"
+          end
         end
 
         def default(factory)
@@ -61,27 +71,16 @@ module Openapi3Parser
 
         private
 
-        def boolean_error(input)
-          "Expected a boolean" unless [true, false].include?(input)
-        end
+        attr_reader :given_input_type, :given_factory, :given_required,
+                    :given_default, :given_validate
 
-        def resolve_type_error(input, factory)
-          if given_input_type.is_a?(Proc)
-            given_input_type.call(input)
-          elsif given_input_type.is_a?(Symbol)
-            factory.send(given_input_type, input)
-          elsif !input.is_a?(given_input_type)
-            "Expected a #{given_input_type}"
-          end
-        end
-
-        def resolve_validation_errors(input, factory)
+        def run_validation(validatable)
           if given_validate.is_a?(Proc)
-            given_validate.call(input)
+            given_validate.call(validatable)
           elsif given_validate.is_a?(Symbol)
-            factory.send(given_validate, input)
+            validatable.factory.send(given_validate, validatable)
           else
-            raise Error, "Expected a Proc or Symbol for validate"
+            raise Error::NotCallable, "Expected a Proc or Symbol for validate"
           end
         end
       end
